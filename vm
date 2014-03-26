@@ -1,0 +1,37 @@
+#!/bin/bash
+
+VBOXMANAGE="/usr/bin/VBoxManage"
+
+
+case "$1" in
+        start)
+	    vboxheadless --startvm "$2" &
+            ;;
+
+        open)
+	    vboxheadless --startvm "$2" &
+	    sleep 2
+	    PORT=$(VBoxManage showvminfo "$2" | grep 'VRDE port:' |tail -c6)
+	    rdesktop 172.16.180.10:$PORT &
+            ;;
+         
+        stop)
+	    $VBOXMANAGE controlvm "$2" acpipowerbutton
+            ;;
+         
+        info)
+	    $VBOXMANAGE showvminfo "$2"
+            ;;
+	show)
+	    PORT=$($VBOXMANAGE showvminfo "$2" | grep 'VRDE port:' |tail -c6)
+	    rdesktop 172.16.180.10:$PORT &
+	    ;;
+        *)
+    	    echo -e "\n Usage: $0 {start|open|stop|info|show} <vmname>"
+    	    echo -e "\nBoxen..."
+    	    $VBOXMANAGE list vms
+    	    echo -e "\nRunning..."
+    	    $VBOXMANAGE list runningvms
+esac
+
+
